@@ -92,12 +92,12 @@ public class DatabaseConnection {
                 pstmt.setBoolean(2, department.getSyn());
                 pstmt.setBoolean(3, department.getPos());
                 pstmt.setInt(4, companyId);
-                pstmt.addBatch();  // десфъ дфчегд мацеед
+                pstmt.addBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             }
 
-            pstmt.executeBatch();  // бйцет дацеед ббъ азъ
+            pstmt.executeBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ
 
-            // чбмъ д-IDs щрецше
+            // пїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -108,7 +108,7 @@ public class DatabaseConnection {
             e.printStackTrace();
         }
 
-        return generatedIds;  // дзжшъ шщйоъ д-IDs щрецше
+        return generatedIds;  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     public List<Integer> insertPreferences(List<preference> preferences) {
@@ -121,12 +121,12 @@ public class DatabaseConnection {
             for (preference preference : preferences) {
                 pstmt.setString(1, preference.getType());
                 pstmt.setDouble(2, preference.getAdd());
-                pstmt.addBatch();  // десфъ дфчегд мацеед
+                pstmt.addBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             }
 
-            pstmt.executeBatch();  // бйцет дацеед ббъ азъ
+            pstmt.executeBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ
 
-            // чбмъ д-IDs щрецше
+            // пїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -137,7 +137,7 @@ public class DatabaseConnection {
             e.printStackTrace();
         }
 
-        return generatedIds;  // дзжшъ шщйоъ д-IDs щрецше
+        return generatedIds;  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     public void insertDepartmentPreference(int departmentId, int preferenceId) {
@@ -162,12 +162,12 @@ public class DatabaseConnection {
             for (possition possition : possitions) {
                 pstmt.setString(1, possition.getName());
                 pstmt.setBoolean(2, possition.getPos());
-                pstmt.addBatch();  // десфъ дфчегд мацеед
+                pstmt.addBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             }
 
-            pstmt.executeBatch();  // бйцет дацеед ббъ азъ
+            pstmt.executeBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ
 
-            // чбмъ д-IDs щрецше
+            // пїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -178,7 +178,7 @@ public class DatabaseConnection {
             e.printStackTrace();
         }
 
-        return generatedIds;  // дзжшъ шщйоъ д-IDs щрецше
+        return generatedIds;  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     public static List<Integer> insertRoles(List<possition> possitions) {
@@ -191,12 +191,12 @@ public class DatabaseConnection {
             for (possition possition : possitions) {
                 pstmt.setString(1, possition.getName());
                 pstmt.setBoolean(2, possition.getPos());
-                pstmt.addBatch();  // десфъ дфчегд мацеед
+                pstmt.addBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             }
 
-            pstmt.executeBatch();  // бйцет дацеед ббъ азъ
+            pstmt.executeBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ
 
-            // чбмъ д-IDs щрецше
+            // пїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -207,7 +207,7 @@ public class DatabaseConnection {
             e.printStackTrace();
         }
 
-        return generatedIds;  // дзжшъ шщйоъ д-IDs щрецше
+        return generatedIds;  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     public List<Integer> insertEmployees(List<employee> employees) {
@@ -221,12 +221,12 @@ public class DatabaseConnection {
                 pstmt.setString(1, employee.getName());
                 pstmt.setString(2, employee.getType());
                 pstmt.setInt(3, employee.getPref().getId());
-                pstmt.addBatch();  // десфъ дфчегд мацеед
+                pstmt.addBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             }
 
-            pstmt.executeBatch();  // бйцет дацеед ббъ азъ
+            pstmt.executeBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ
 
-            // чбмъ д-IDs щрецше
+            // пїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -236,9 +236,37 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return generatedIds;  // дзжшъ шщйоъ д-IDs щрецше
+        return generatedIds;  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
     }
+
+    public static List<Integer> insertDepartmentPositionPairs(List<DepartmentPositionPair> departmentPositionPairs){
+        String sql = "INSERT INTO department_role (department_id, role_id) VALUES (?, ?)";
+        List<Integer> generatedIds = new ArrayList<>();
+
+        try (Connection conn = getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (DepartmentPositionPair pair : departmentPositionPairs) {
+                pstmt.setInt(1, pair.getDepartmentId());
+                pstmt.setInt(2, pair.getPositionId());
+                pstmt.addBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+            }
+
+            pstmt.executeBatch();  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ
+
+            // пїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                while (rs.next()) {
+                    generatedIds.add(rs.getInt(1));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return generatedIds;  // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ-IDs пїЅпїЅпїЅпїЅпїЅпїЅ
+    }
+
     public List<company> getCompanies(String sql) {
       
         List<company> companies = new ArrayList<>();

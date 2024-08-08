@@ -136,17 +136,28 @@ public void addEmpModel(String name) {
 @Override
 public void save() {
 	int companyId=DatabaseConnection.insertCompany(comp.getName());
-	List<department>departments= comp.getDep();
-	List<Integer>departmentIds=DatabaseConnection.insertDepartments(departments,companyId);
-	List<possition>possitions=new ArrayList<>();
-	for(int i=0;i<departments.size();i++) {
+	List<department> departments = comp.getDep();
+	List<Integer> departmentIds = DatabaseConnection.insertDepartments(departments,companyId);
+	List<possition> possitions = new ArrayList<>();
+	List<DepartmentPositionPair> departmentPositionPairs = new ArrayList<>();
+
+	//create postions list to insert
+	//fill departments with ids
+	for(int i=0; i<departmentIds.size(); i++){
+		department department = departments.get(i);
+		department.setId(departmentIds.get(i));
 		possitions.addAll(departments.get(i).getPossitions());
 	}
-	List<Integer>possitionIds=DatabaseConnection.insertRoles(possitions);
-	for(int i=0;i<departments.size();i++) {
-		possitions.addAll(departments.get(i).getPossitions());
+
+	List<Integer> positionIds = DatabaseConnection.insertRoles(possitions);
+	
+	int numPairs = Math.min(departmentIds.size(), positionIds.size()); 
+
+	for (int i = 0; i < numPairs; i++) {
+		departmentPositionPairs.add(new DepartmentPositionPair(departmentIds.get(i), positionIds.get(i)));
 	}
 	
+	List<Integer> departmentPositionPairIds = DatabaseConnection.insertDepartmentPositionPairs(departmentPositionPairs);
 }
 @Override
 public preference setPref(String pref)

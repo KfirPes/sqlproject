@@ -25,6 +25,13 @@ public class department implements Serializable {
 		this.isPossible = isPossible;
 		this.isSyn = isSyn;
 	}
+
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+
+
 	public void setPref(preference Pref)
 	{
 		if(isPossible)
