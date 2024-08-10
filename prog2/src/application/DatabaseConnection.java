@@ -59,45 +59,45 @@ public class DatabaseConnection {
 		}
     	return 0;
     }
-    public static int insertCompany( String companyName) {
-    	int generatedId=-1;
-        String sql = "INSERT INTO companies ( company_name) VALUES (?)";
-        try (Connection conn = getConnection();
-        	PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(2, companyName);
+    public static int insertCompany(String companyName, Connection conn) {
+        int generatedId = -1;
+        String sql = "INSERT INTO companies (company_name) VALUES (?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {  
+            pstmt.setString(1, companyName);
             int affectedRows = pstmt.executeUpdate();
 
             if (affectedRows > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        generatedId = rs.getInt(1); // Retrieves the first column of the ResultSet
+                    if (rs.next()) {  // áãå÷ àí éù úåöàä ìôðé ùàúä îðñä ìâùú àìéä
+                        generatedId = rs.getInt(1);  // ÷áìú ä-ID ùðåöø
                     }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return generatedId;
     }
 
-    public static List<Integer> insertDepartments(List<department> departments, int companyId) {
+    public static List<Integer> insertDepartments(List<department> departments, int companyId,Connection conn) {
         String sql = "INSERT INTO departments (department_name, is_syn, is_possible, company_id) VALUES (?, ?, ?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (
+             PreparedStatement pstmt = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
+        	
             for (department department : departments) {
                 pstmt.setString(1, department.getName());
                 pstmt.setBoolean(2, department.getSyn());
                 pstmt.setBoolean(3, department.getPos());
                 pstmt.setInt(4, companyId);
-                pstmt.addBatch();  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                pstmt.addBatch();  
             }
 
-            pstmt.executeBatch();  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+            pstmt.executeBatch();  
 
-            // ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -105,17 +105,18 @@ public class DatabaseConnection {
             }
 
         } catch (SQLException e) {
+        	System.out.println(e.getMessage());
             e.printStackTrace();
         }
 
         return generatedIds;  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 
-    public List<Integer> insertPreferences(List<preference> preferences) {
+    public static List<Integer> insertPreferences(List<preference> preferences,Connection conn) {
         String sql = "INSERT INTO preferences (preference_type, addition) VALUES (?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             for (preference preference : preferences) {
@@ -140,23 +141,28 @@ public class DatabaseConnection {
         return generatedIds;  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 
-    public void insertDepartmentPreference(int departmentId, int preferenceId) {
+    public static void insertDepartmentPreference(List<Integer>departmentsId,List<Integer>preferencesId,Connection conn) {
         String sql = "INSERT INTO departments_preferences (department_id, preference_id) VALUES (?, ?)";
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, departmentId);
-            pstmt.setInt(2, preferenceId);
+        	int count=0;
+        	for(int Ids:departmentsId)
+        	{
+            pstmt.setInt(1, Ids);
+            pstmt.setInt(2, preferencesId.get(count));
+            count++;
+        	}
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public List<Integer> insertPossitions(List<possition> possitions) {
+    public List<Integer> insertPossitions(List<possition> possitions,Connection conn) {
         String sql = "INSERT INTO roles (role_name, is_possible) VALUES (?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             for (possition possition : possitions) {
@@ -181,11 +187,11 @@ public class DatabaseConnection {
         return generatedIds;  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 
-    public static List<Integer> insertRoles(List<possition> possitions) {
+    public static List<Integer> insertRoles(List<possition> possitions,Connection conn) {
         String sql = "INSERT INTO roles (role_name, is_possible) VALUES (?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             for (possition possition : possitions) {
@@ -210,17 +216,17 @@ public class DatabaseConnection {
         return generatedIds;  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 
-    public List<Integer> insertEmployees(List<employee> employees) {
+    public static List<Integer> insertEmployees(List<employee> employees,List<Integer>prefEmpsIds,Connection conn) {
         String sql = "INSERT INTO employees (employee_name, employee_type, preference_id) VALUES (?, ?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
-
-        try (Connection conn = getConnection();
+        
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        	int count=0;
             for (employee employee : employees) {
                 pstmt.setString(1, employee.getName());
                 pstmt.setString(2, employee.getType());
-                pstmt.setInt(3, employee.getPref().getId());
+                pstmt.setInt(3, prefEmpsIds.get(count));
                 pstmt.addBatch();  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             }
 
@@ -239,11 +245,11 @@ public class DatabaseConnection {
         return generatedIds;  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 
-    public static List<Integer> insertDepartmentPositionPairs(List<DepartmentPositionPair> departmentPositionPairs){
-        String sql = "INSERT INTO department_role (department_id, role_id) VALUES (?, ?)";
+    public static List<Integer> insertDepartmentPositionPairs(List<DepartmentPositionPair> departmentPositionPairs,Connection conn){
+        String sql = "INSERT INTO departments_roles (department_id, role_id) VALUES (?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             for (DepartmentPositionPair pair : departmentPositionPairs) {
@@ -267,11 +273,11 @@ public class DatabaseConnection {
         return generatedIds;  // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½-IDs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     }
 
-    public List<company> getCompanies(String sql) {
+    public List<company> getCompanies(String sql,Connection conn) {
       
         List<company> companies = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
@@ -286,10 +292,10 @@ public class DatabaseConnection {
 
         return companies;
     }
-    public List<department> getDepartments(String sql) {
+    public List<department> getDepartments(String sql,Connection conn) {
     	List<department> departments = new ArrayList<>();
 
-    	try (Connection conn = getConnection();
+    	try (
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 ResultSet rs = pstmt.executeQuery()) {
             	 while (rs.next()) {
@@ -306,10 +312,10 @@ public class DatabaseConnection {
 
         return departments;
     }
-    public List<possition> getPossitions(String sql) {
+    public List<possition> getPossitions(String sql,Connection conn) {
         List<possition> possitions = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
@@ -326,11 +332,11 @@ public class DatabaseConnection {
 
         return possitions;
     }
-    public List<employee> getEmployees(String sql) {
+    public List<employee> getEmployees(String sql,Connection conn) {
         
         List<employee> employees = new ArrayList<>();
 
-        try (Connection conn = getConnection();
+        try (
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              ResultSet rs = pstmt.executeQuery() ;
                 while (rs.next()) {

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 public class company implements Serializable {
-	private int id;
+	private static int id=0;
 	private String name;
 	private String address;
 	private Vector<modelListener>listeners=new Vector<modelListener>();
@@ -13,6 +13,12 @@ public class company implements Serializable {
 	public company(int company_id,String company_name) {
 		this.id=company_id;
 		this.name=company_name;
+	}
+	
+	public company(String name) {
+		super();
+		this.name = name;
+		this.id+=1;
 	}
 	public void addDep(department Dep)
 	{

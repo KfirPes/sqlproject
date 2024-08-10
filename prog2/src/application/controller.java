@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,29 +136,40 @@ public void addEmpModel(String name) {
 //}
 @Override
 public void save() {
-	int companyId=DatabaseConnection.insertCompany(comp.getName());
+	Connection conn = DatabaseConnection.getConnection();
+	int companyId=DatabaseConnection.insertCompany(comp.getName(),conn);
 	List<department> departments = comp.getDep();
-	List<Integer> departmentIds = DatabaseConnection.insertDepartments(departments,companyId);
+	List<Integer> departmentIds = DatabaseConnection.insertDepartments(departments,companyId,conn);
 	List<possition> possitions = new ArrayList<>();
 	List<DepartmentPositionPair> departmentPositionPairs = new ArrayList<>();
-
+	List<employee>employees=new ArrayList<>();
+	List<preference>prefDeps=new ArrayList<>();
+	List<preference>prefEmps=new ArrayList<>();
 	//create postions list to insert
 	//fill departments with ids
 	for(int i=0; i<departmentIds.size(); i++){
-		department department = departments.get(i);
-		department.setId(departmentIds.get(i));
-		possitions.addAll(departments.get(i).getPossitions());
+		department depart = departments.get(i);
+		depart.setId(departmentIds.get(i));
+		possitions.addAll(depart.getPossitions());
+		prefDeps.add(departments.get(i).getPref());
 	}
-
-	List<Integer> positionIds = DatabaseConnection.insertRoles(possitions);
 	
+	List<Integer> prefDepsIds=DatabaseConnection.insertPreferences(prefDeps, conn);
+	DatabaseConnection.insertDepartmentPreference(departmentIds, prefDepsIds, conn);
+	List<Integer> positionIds = DatabaseConnection.insertRoles(possitions,conn);
+	for (int i = 0; i < positionIds.size(); i++) {
+		employees.add(possitions.get(i).getEmp());
+		prefEmps.add(employees.get(i).getPref());
+	}
+	List<Integer>prefEmpsIds=DatabaseConnection.insertPreferences(prefEmps, conn);
+	List<Integer>employeesIds=DatabaseConnection.insertEmployees(employees,prefEmpsIds,conn);
 	int numPairs = Math.min(departmentIds.size(), positionIds.size()); 
 
 	for (int i = 0; i < numPairs; i++) {
 		departmentPositionPairs.add(new DepartmentPositionPair(departmentIds.get(i), positionIds.get(i)));
 	}
 	
-	List<Integer> departmentPositionPairIds = DatabaseConnection.insertDepartmentPositionPairs(departmentPositionPairs);
+	List<Integer> departmentPositionPairIds = DatabaseConnection.insertDepartmentPositionPairs(departmentPositionPairs,conn);
 }
 @Override
 public preference setPref(String pref)

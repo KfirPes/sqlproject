@@ -22,7 +22,7 @@ public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			company comp=new company();
+			company comp=new company("bobo");
 			addAppartment addApp=new addAppartment(primaryStage);
 			controller cont=new controller(comp,addApp);
 			addEmpRol aer=new addEmpRol(new Stage(),comp);

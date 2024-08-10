@@ -1,3 +1,4 @@
+package application;
 public class DepartmentPositionPair {
     private int departmentId;
     private int positionId;
