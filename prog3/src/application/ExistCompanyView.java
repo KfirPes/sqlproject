@@ -3,6 +3,8 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javax.swing.JFrame;
+
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,9 +19,18 @@ import javafx.stage.Stage;
 public class ExistCompanyView extends Application {
     private ComboBox<company> companyComboBox;
     private ComboBox<department> departmentComboBox;
+    private ComboBox<employee> employeeComboBox;      // ComboBox for Employees
     private Button btnAddDepartment;
+    private Button btnAddPreference;
+    private Button btnAddEmployee;
+    private Button btnAddCompany;
     private ObservableList<company> companies;
     private ObservableList<department> departments = FXCollections.observableArrayList();
+    private ObservableList<preference> preferences;  // ObservableList for Preferences
+    private ObservableList<employee> roles = FXCollections.observableArrayList();
+    private ObservableList<employee> employees = FXCollections.observableArrayList();
+    private Integer departmentId;
+    private Integer companyId;
 
     @Override
     public void start(Stage primaryStage) {
@@ -34,59 +45,143 @@ public class ExistCompanyView extends Application {
         companyComboBox = new ComboBox<>();
         companies = FXCollections.observableArrayList(DatabaseConnection.getCompanies("SELECT * FROM public.companies",conn));
         companyComboBox.setItems(companies);
-        //updateDepartments(companies.get(0));
+        
+        btnAddCompany = new Button("Add Company");
+        btnAddCompany.setOnAction(e -> openNewCompanyDialog());
+        
         companyComboBox.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> {
-            updateDepartments(newValue);
+        	if(newValue != null) {
+            	this.companyId = newValue.getId(); 
+                setDepartments();
+                departmentComboBox.setItems(departments);
+        	}
         });
-
+        
         // Setup Departments ComboBox
         departmentComboBox = new ComboBox<>();
-        departmentComboBox.setItems(departments);
+        
+        departmentComboBox.getSelectionModel().selectedItemProperty().addListener((options, oldValue, newValue) -> {
+        	System.out.println(newValue);
+        	if(newValue != null) {
+            	this.departmentId = newValue.getId(); 
+                setEmployees();
+        	}
+        });
 
         // Setup Buttons
         btnAddDepartment = new Button("Add Department");
-        btnAddDepartment.setOnAction(e -> addDepartment(companyComboBox.getValue()));
-
+        btnAddDepartment.setOnAction(e -> openDepartmentDialog(companyComboBox.getValue()));
+        
+        // New Add Preference Button
+        btnAddPreference = new Button("Add Preference");
+        btnAddPreference.setOnAction(e -> addPreference());
+        
+        btnAddEmployee = new Button("Add Employee");
+        btnAddEmployee.setOnAction(e -> openEmployeeDialog());
+        
+        // Setup Employees ComboBox
+        employeeComboBox = new ComboBox<>();
+        employees = FXCollections.observableArrayList(getEmployees());  // Populate employees from database
+        employeeComboBox.setItems(employees);
+        
         // Add components to Grid
         grid.add(new Label("Select Company:"), 0, 0);
         grid.add(companyComboBox, 1, 0);
-        grid.add(new Label("Select Department:"), 0, 1);
-        grid.add(departmentComboBox, 1, 1);
-        grid.add(btnAddDepartment, 1, 2);
+        
+        grid.add(btnAddCompany, 1, 1);
+
+	     grid.add(new Label("Select Department:"), 0, 2);
+	     grid.add(departmentComboBox, 1, 2);
+	     grid.add(btnAddDepartment, 1, 3);
+	
+	     grid.add(btnAddPreference, 1, 4);
+	
+	     // Add Employee Label and ComboBox
+	     grid.add(new Label("Select Employee:"), 0, 5);
+	     grid.add(employeeComboBox, 1, 5);
+	     grid.add(btnAddEmployee, 1, 6);
+        
 
         Scene scene = new Scene(grid, 400, 300);
         primaryStage.setTitle("Company and Departments");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+    
+    private void openNewCompanyDialog() {
+        Stage stage = new Stage();
+        CompanyDialog dialog = new CompanyDialog(stage, newComp -> {
+        	if(newComp != null) {
+            	this.companyId = newComp.getId();
+            	companies.add(newComp);
+        	}
+        });
+        dialog.show();
+	}
 
-    private void updateDepartments(company company) {
+	private void addPreference() {
+        JFrame frame = new JFrame();
+        PreferenceDialog dialog = new PreferenceDialog(frame,companyId);
+        dialog.setVisible(true);
+        
+        preference newPreference = dialog.getPreference();
+        if (newPreference != null) {
+            preferences.add(newPreference);  // Add the new Preference to the ObservableList
+        }
+    }
+    
+    private void updatePreferences() {
         // This method should fetch departments based on the selected company
         // For simplicity, here we just clear the departments list
-        departments.clear();
-        String sql = "SELECT * FROM public.departments WHERE company_id = 1";
-        departments.addAll(DatabaseConnection.getDepartments(sql,DatabaseConnection.getConnection()));
+        preferences.clear();
+        String sql = "SELECT * FROM public.preferences";//need to change;
+        preferences.addAll(DatabaseConnection.getPreferences(sql,DatabaseConnection.getConnection()));
     }
 
-    private void addDepartment(company company) {
-        // Code to add a new department
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("New Department");
-        dialog.setHeaderText("Add a new department for " + company.getName());
-        dialog.setContentText("Please enter the department name:");
-        
-        dialog.getDialogPane().getButtonTypes().clear();
-        ButtonType okButtonType= new ButtonType("OK", ButtonData.OK_DONE);
-        ButtonType cancelButtonType= new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, cancelButtonType);
+    private void setDepartments() {
+        departments.clear();
+        String sql = "SELECT * FROM public.departments WHERE company_id = " + this.companyId;
+        departments.addAll(DatabaseConnection.getDepartments(sql,DatabaseConnection.getConnection()));
+    }
+    
+    private void setEmployees() {
+    	employees.clear();
+    	if(this.companyId != null) {
+            String sql = "SELECT * FROM public.employees WHERE company_id = " + this.companyId;
+            employees.addAll(DatabaseConnection.getEmployees(sql));	
+    	}
+    }
+    
+    private ObservableList<employee> getEmployees(){
+    	return employees;
+    }
 
-        dialog.showAndWait().ifPresent(response -> {
-    		String departmentName = dialog.getEditor().getText();
-            System.out.println("Adding new department: " + departmentName);
-            department newDep = new department(departmentName, true, true);
-            departments.add(newDep);
-            DatabaseConnection.insertDepartments(Arrays.asList(newDep), company.getId());
-        });
+    private void openDepartmentDialog(company company) {
+        if(company != null) {
+        	Stage stage = new Stage();
+            DepartmentDialog dialog = new DepartmentDialog(stage, company.getId(), newDepartment -> {           
+                if (newDepartment != null) {
+                    departments.add(newDepartment);  // Add the new Preference to the ObservableList
+                }
+            });
+
+            dialog.showAndWait();
+        }
+    }
+    
+    
+    private void openEmployeeDialog() {
+    	if(companyId != null) {
+    		Stage stage = new Stage();
+        
+            EmployeeDialog dialog = new EmployeeDialog(stage, companyId);
+            dialog.showAndWait();
+
+            employee newEmployee = dialog.getEmployee();
+            if (newEmployee != null) {
+                employees.add(newEmployee);  // Add the new Employee to the ObservableList
+            }
+        }
     }
 
     public static void main(String[] args) {

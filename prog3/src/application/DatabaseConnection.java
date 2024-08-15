@@ -9,48 +9,61 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseConnection {
-    private static Connection connection = null;
+	// Static instance of self
+    private static DatabaseConnection instance = new DatabaseConnection();
+    private static Connection connection;
 
-    // Private constructor prevents instantiation from other classes
-    private DatabaseConnection() { }
+    // Private constructor to ensure only one instance
+    private DatabaseConnection() {
+        // Optionally initialize the connection here or lazily in the getConnection method
+    }
 
+    // Method to get the instance of the class
+    public static DatabaseConnection getInstance() {
+        return instance;
+    }
+
+    // Method to get or create the database connection
     public static Connection getConnection() {
-        if (connection == null) {
-            synchronized (DatabaseConnection.class) {
-                if (connection == null) {
-                    try {
-                        Class.forName("org.postgresql.Driver");
-                        connection = DriverManager.getConnection(
-                            "jdbc:postgresql://localhost:5432/prog",
-                            "postgres",
-                            "Kfir5471");
-                    } catch (ClassNotFoundException | SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
+        try {
+            // Check if the connection is null or closed, then create a new connection
+            if (connection == null || connection.isClosed()) {
+                // Load the PostgreSQL JDBC driver
+                Class.forName("org.postgresql.Driver");
+                // Establish the connection to the database
+                connection = DriverManager.getConnection(
+                        "jdbc:postgresql://localhost:5432/prog",
+                        "postgres",
+                        "Kfir5471");
+                System.out.println("Connected to PostgreSQL database!");
             }
+        } catch (ClassNotFoundException e) {
+            System.out.println("PostgreSQL JDBC Driver is not found. Include it in your library path.");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("Connection failure.");
+            e.printStackTrace();
         }
         return connection;
     }
 
-    public static void closeConnection() {
-        if (connection != null) {
-            try {
+    // Method to close the database connection
+    public void closeConnection() {
+        try {
+            if (connection != null) {
                 connection.close();
-            } catch (SQLException e) {
-                
-            	 e.printStackTrace();
-            } finally {
-               
-                connection = null;
+                System.out.println("Connection closed.");
             }
+        } catch (SQLException e) {
+            System.out.println("Failed to close the connection.");
+            e.printStackTrace();
         }
     }
 
     public static int insertCompany(String companyName) {
         int generatedId = -1;
         String sql = "INSERT INTO companies (company_name) VALUES (?)";
-        Connection conn = DatabaseConnection.getConnection();
+        Connection conn = getConnection();
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {  
             pstmt.setString(1, companyName);
             int affectedRows = pstmt.executeUpdate();
@@ -100,22 +113,23 @@ public class DatabaseConnection {
         return generatedIds;  // ����� ����� �-IDs ������
     }
 
-    public static List<Integer> insertPreferences(List<preference> preferences) {
-        String sql = "INSERT INTO preferences (preference_type, addition) VALUES (?, ?)";
+    public static List<Integer> insertPreferences(List<preference> preferences, int company_Id) {
+        String sql = "INSERT INTO preferences (preference_type, addition, company_Id) VALUES (?, ?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        	System.out.println(preferences);
             for (preference preference : preferences) {
                 pstmt.setString(1, preference.getType());
                 pstmt.setDouble(2, preference.getAdd());
-                pstmt.addBatch();  // ����� ������ ������
+                pstmt.setInt(3, company_Id);
+                pstmt.addBatch();  
             }
 
-            pstmt.executeBatch();  // ����� ������ ��� ���
+            pstmt.executeBatch(); 
 
-            // ���� �-IDs ������
+            
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -125,8 +139,7 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return generatedIds;  // ����� ����� �-IDs ������
+        return generatedIds;  
     }
 
     public static void insertDepartmentPreference(List<Integer>departmentsId,List<Integer>preferencesId) {
@@ -146,7 +159,7 @@ public class DatabaseConnection {
         }
     }
 
-    public List<Integer> insertPossitions(List<possition> possitions) {
+    public static List<Integer> insertPossitions(List<possition> possitions) {
         String sql = "INSERT INTO roles (role_name, is_possible) VALUES (?, ?)";
         List<Integer> generatedIds = new ArrayList<>();
 
@@ -156,12 +169,11 @@ public class DatabaseConnection {
             for (possition possition : possitions) {
                 pstmt.setString(1, possition.getName());
                 pstmt.setBoolean(2, possition.getPos());
-                pstmt.addBatch();  // ����� ������ ������
+                pstmt.addBatch();  
             }
 
-            pstmt.executeBatch();  // ����� ������ ��� ���
-
-            // ���� �-IDs ������
+            pstmt.executeBatch();  
+            System.out.println("positions inserted!");	
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -172,36 +184,33 @@ public class DatabaseConnection {
             e.printStackTrace();
         }
 
-        return generatedIds;  // ����� ����� �-IDs ������
+        return generatedIds; 
     }
 
-    public static List<Integer> insertRoles(List<possition> possitions) {
-        String sql = "INSERT INTO roles (role_name, is_possible) VALUES (?, ?)";
-        List<Integer> generatedIds = new ArrayList<>();
+    public static int insertPosition(possition possition, int companyId, int departmentId) {
+        String sql = "INSERT INTO roles (role_name, is_possible, company_id, department_id) VALUES (?, ?, ?, ?)";
+        int generatedId = -1;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            for (possition possition : possitions) {
-                pstmt.setString(1, possition.getName());
-                pstmt.setBoolean(2, possition.getPos());
-                pstmt.addBatch();  // ����� ������ ������
-            }
+            pstmt.setString(1, possition.getName());
+            pstmt.setBoolean(2, possition.getPos());
+            pstmt.setInt(3, companyId);
+            pstmt.setInt(4, departmentId);
+            pstmt.execute();  
 
-            pstmt.executeBatch();  // ����� ������ ��� ���
-
-            // ���� �-IDs ������
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                while (rs.next()) {
-                    generatedIds.add(rs.getInt(1));
-                }
+            	if(rs.next()) {
+            		generatedId = rs.getInt(1);
+            	}
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return generatedIds;  // ����� ����� �-IDs ������
+        return generatedId; 
     }
 
     public static List<Integer> insertEmployees(List<employee> employees,List<Integer>prefEmpsIds) {
@@ -215,12 +224,11 @@ public class DatabaseConnection {
                 pstmt.setString(1, employee.getName());
                 pstmt.setString(2, employee.getType());
                 pstmt.setInt(3, prefEmpsIds.get(count));
-                pstmt.addBatch();  // ����� ������ ������
+                pstmt.addBatch(); 
             }
 
-            pstmt.executeBatch();  // ����� ������ ��� ���
+            pstmt.executeBatch(); 
 
-            // ���� �-IDs ������
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
                     generatedIds.add(rs.getInt(1));
@@ -230,7 +238,7 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return generatedIds;  // ����� ����� �-IDs ������
+        return generatedIds;  
     }
 
     public static List<Integer> insertDepartmentPositionPairs(List<DepartmentPositionPair> departmentPositionPairs){
@@ -247,7 +255,7 @@ public class DatabaseConnection {
             }
 
             pstmt.executeBatch();  // ����� ������ ��� ���
-
+            System.out.println("insert DepartmentPositionPairs succeeded");
             // ���� �-IDs ������
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 while (rs.next()) {
@@ -260,6 +268,34 @@ public class DatabaseConnection {
         }
         return generatedIds;  // ����� ����� �-IDs ������
     }
+    
+    public static List<Integer> insertEmployeePositionPairs(List<EmployeePositionPair> employeePositionPairs){
+        String sql = "INSERT INTO employees_roles (employee_id, role_id) VALUES (?, ?)";
+        List<Integer> generatedIds = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            for (EmployeePositionPair pair : employeePositionPairs) {
+                pstmt.setInt(1, pair.getEmployeeId());
+                pstmt.setInt(2, pair.getPositionId());
+                pstmt.addBatch(); 
+            }
+
+            pstmt.executeBatch();  
+            System.out.println("inserted EmployeePositionPairs succeed");
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                while (rs.next()) {
+                    generatedIds.add(rs.getInt(1));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return generatedIds; 
+    }
+
 
     public static List<company> getCompanies(String sql,Connection conn) {
       
@@ -301,12 +337,12 @@ public class DatabaseConnection {
         	
             e.printStackTrace();
         }
-
         return departments;
     }
-    public List<possition> getPossitions(String sql) {
+    
+    public static List<possition> getPositions(String sql) {
         List<possition> possitions = new ArrayList<>();
-
+        System.out.println(sql);
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
@@ -324,10 +360,10 @@ public class DatabaseConnection {
 
         return possitions;
     }
-    public List<employee> getEmployees(String sql) {
-        
+    
+    public static List<employee> getEmployees(String sql) {
+    	System.out.println(sql);
         List<employee> employees = new ArrayList<>();
-
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
              ResultSet rs = pstmt.executeQuery() ;
@@ -341,7 +377,25 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return employees;
     }
+    
+    public static List<preference> getPreferences(String sql, Connection conn) {
+        List<preference> preferences = new ArrayList<>();
+        try (
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             ResultSet rs = pstmt.executeQuery() ;
+                while (rs.next()) {
+                    int preferenceId = rs.getInt("preference_id");
+                    double addition = rs.getDouble("addition");
+                    String preferenceType = rs.getString("preference_type");
+                    preferences.add(new preference(preferenceId,preferenceType,addition));
+                }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return preferences;
+    }
+
 }

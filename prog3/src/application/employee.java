@@ -7,18 +7,18 @@ public class employee implements Serializable {
 	private String type;
 	private String name;
 	private preference Pref;
-	public employee(String type,String name,preference Pref)
+	public employee(String name,String type,preference Pref)
 	{
 		this.name=name;
-		this.Pref=Pref;
 		this.type=type;
+		this.Pref=Pref;
 	}
 	
-	public employee(int id, String type, String name) {
+	public employee(int id, String name, String type) {
 		super();
 		this.id = id;
-		this.type = type;
 		this.name = name;
+		this.type = type;
 	}
 
 	public String getType()
@@ -32,5 +32,10 @@ public class employee implements Serializable {
 	public preference getPref()
 	{
 	return Pref;
+	}
+	
+	@Override
+	public String toString() {
+		return this.name;
 	}
 }

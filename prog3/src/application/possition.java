@@ -21,6 +21,12 @@ public class possition implements Serializable{
 		this.name = name;
 		this.isPossible = isPossible;
 	}
+	
+	public possition(String name, boolean isPossible) {
+		super();
+		this.name = name;
+		this.isPossible = isPossible;
+	}
 
 	public String getName()
 	{
@@ -43,6 +49,15 @@ public class possition implements Serializable{
 		}
 		else
 			return 0;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
 	}
 }
 	

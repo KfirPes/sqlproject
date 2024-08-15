@@ -6,11 +6,22 @@ public class preference implements Serializable {
 	private int id;
 	private String type;
 	private double addition;
+	
 	public preference(String type,double addition)
 	{
 		this.type=type;
 		this.addition=addition;
 	}
+	
+	
+	public preference(int id, String type, double addition) {
+		super();
+		this.id = id;
+		this.type = type;
+		this.addition = addition;
+	}
+
+
 	public String getType()
 	{
 	return type;
@@ -26,4 +37,8 @@ public class preference implements Serializable {
 		this.id = id;
 	}
 	
+	@Override
+	public String toString() {
+		return type;
+	}
 }
