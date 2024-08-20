@@ -1,0 +1,78 @@
+-- Create Companies Table
+CREATE TABLE companies (
+    company_id SERIAL PRIMARY KEY,
+    company_name VARCHAR(50) NOT NULL
+);
+
+-- Create Preferences Table
+CREATE TABLE preferences (
+    preference_id SERIAL PRIMARY KEY,
+    preference_type VARCHAR(100) NOT NULL,
+    addition DECIMAL,
+    company_id INT,
+    CONSTRAINT fk_company
+        FOREIGN KEY (company_id) REFERENCES companies (company_id) ON DELETE CASCADE
+);
+
+-- Create Departments Table
+CREATE TABLE departments (
+    department_id SERIAL PRIMARY KEY,
+    department_name VARCHAR(50) NOT NULL,
+    is_syn BOOLEAN,
+    is_possible BOOLEAN,
+    company_id INT,
+    preference_id INT,
+    CONSTRAINT fk__company
+        FOREIGN KEY (company_id) REFERENCES companies (company_id) ON DELETE CASCADE,
+    CONSTRAINT fk_departments_preference
+        FOREIGN KEY (preference_id) REFERENCES preferences (preference_id)
+);
+
+-- Create Roles Table, now linked to Departments
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    role_name VARCHAR(100) NOT NULL,
+    is_possible BOOLEAN,
+    addition DECIMAL,
+    company_id INT,
+    department_id INT,
+    CONSTRAINT fk_company
+        FOREIGN KEY (company_id) REFERENCES companies (company_id) ON DELETE CASCADE,
+    CONSTRAINT fk_department
+        FOREIGN KEY (department_id) REFERENCES departments (department_id) ON DELETE CASCADE
+);
+
+-- Create Employees Table
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    employee_name VARCHAR(50) NOT NULL,
+    employee_type VARCHAR(50) NOT NULL,
+    company_id INT,
+    preference_id INT,
+    CONSTRAINT fk_company
+        FOREIGN KEY (company_id) REFERENCES companies (company_id) ON DELETE CASCADE,
+    CONSTRAINT fk_employees_preference
+        FOREIGN KEY (preference_id) REFERENCES preferences (preference_id)
+);
+
+-- Create Employees to Roles Association Table
+CREATE TABLE employees_roles (
+    employee_id INT,
+    role_id INT,
+    CONSTRAINT fk_employees_roles_employee
+        FOREIGN KEY (employee_id) REFERENCES employees (employee_id),
+    CONSTRAINT fk_employees_roles_role
+        FOREIGN KEY (role_id) REFERENCES roles (role_id),
+    CONSTRAINT employees_roles_pk PRIMARY KEY (employee_id, role_id)
+);
+
+-- Create Employees to Departments Association Table (if needed)
+CREATE TABLE employees_departments (
+    employee_id INT,
+    department_id INT,
+    CONSTRAINT fk_employees_departments_employee
+        FOREIGN KEY (employee_id) REFERENCES employees (employee_id) ON DELETE CASCADE,
+    CONSTRAINT fk_employees_departments_department
+        FOREIGN KEY (department_id) REFERENCES departments (department_id) ON DELETE CASCADE,
+    CONSTRAINT employees_departments_pk PRIMARY KEY (employee_id, department_id)
+);

@@ -1,0 +1,38 @@
+INSERT INTO companies (company_name) VALUES
+('OpenAI'),
+('SpaceX'),
+('Tesla');
+
+INSERT INTO preferences (preference_type, addition, company_id) VALUES
+('Flexible Hours', 0.0, 1),
+('Remote Work', 0.0, 2),
+('Stock Options', 0.0, 3);
+
+INSERT INTO departments (department_name, is_syn, is_possible, company_id, preference_id) VALUES
+('Research', TRUE, TRUE, 1, 1),
+('Engineering', FALSE, TRUE, 1, 2),
+('Human Resources', TRUE, FALSE, 2, 1),
+('Marketing', FALSE, TRUE, 3, 3);
+
+INSERT INTO roles (role_name, is_possible, addition, company_id, department_id) VALUES
+('Software Engineer', TRUE, 5000.00, 1, 1),
+('Project Manager', TRUE, 3000.00, 1, 2),
+('HR Specialist', FALSE, 2000.00, 2, 3),
+('Marketing Director', TRUE, 4500.00, 3, 4);
+
+INSERT INTO employees (employee_name, employee_type, company_id, preference_id) VALUES
+('Alice Johnson', 'Full-Time', 1, 1),
+('Bob Smith', 'Part-Time', 2, 2),
+('Charlie Davis', 'Contractor', 3, 3);
+
+INSERT INTO employees_roles (employee_id, role_id) VALUES
+(1, 1),
+(2, 3),
+(3, 4);
+
+
+INSERT INTO employees_departments (employee_id, department_id) VALUES
+(1, 1),
+(1, 2),  -- Example: Alice works in both Research and Engineering
+(2, 3),
+(3, 4);
